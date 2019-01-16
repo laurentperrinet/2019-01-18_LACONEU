@@ -9,7 +9,14 @@ import os
 home = os.environ['HOME']
 figpath_talk = 'figures'
 figpath_slides = os.path.join(home, 'nextcloud/libs/slides.py/figures/')
-#
+figpath_talkbcp = 'figures' # os.path.join(home, 'pool/AME_is_AnalyseModelisationExperimentation_Chloe/AnticipatorySPEM/2017-11-24_Poster_GDR_Robotique/figures')
+figpath_GDR = os.path.join(home, 'pool/AME_is_AnalyseModelisationExperimentation_Chloe/AnticipatorySPEM/2017-11-24_Poster_GDR_Robotique/figures')
+figpath_aSPEM = os.path.join(home, 'pool/AME_is_AnalyseModelisationExperimentation_Chloe/AnticipatorySPEM/figures')
+figpath_aSPEM = os.path.join(home, 'pool/AME_is_AnalyseModelisationExperimentation_Chloe/AnticipatorySPEM/figures')
+figpath_ms = os.path.join(home, 'pool/AME_is_AnalyseModelisationExperimentation_Chloe/AnticipatorySPEM/ms/figures')
+figpath_slides = os.path.join(home, 'nextcloud/libs/slides.py/figures/')
+
+
 import sys
 print(sys.argv)
 tag = sys.argv[0].split('.')[0]
@@ -42,8 +49,8 @@ meta = dict(
  bgcolor="white",
  author='Laurent Perrinet, INT',
  author_link='<a href="http://invibe.net">Laurent Perrinet</a>',
- short_title='Role of dynamics in neural computations underlying  visual processing',
- title='Role of dynamics in neural computations underlying  visual processing',
+ short_title='Should I stay or should I go? Adaption of human observers to the volatility of visual inputs',
+ title='Should I stay or should I go? Adaption of human observers to the volatility of visual inputs',
  conference_url='http://www.laconeu.cl',
  short_conference='LACONEU 2019',
  conference='LACONEU 2019: 5th Latin-American Summer School in Computational Neuroscience',
@@ -60,11 +67,11 @@ wiki_extras="""
 <<Include(AnrHorizontalV1Aknow)>>
 ----
 TagYear{YY} TagTalks [[TagAnrHorizontalV1]]""".format(YY=str(YYYY)[-2:]),
-sections=['About Dynamics, vision and neurons',
-          'Active Inference',
-          'Back to the present',
-          'Perspectives ?']
-)
+sections= ['Motivation', #A dynamic probabilistic bias in visual motion direction',
+    'Raw psychophysical results',
+    'The Bayesian Changepoint Detector',
+    'Results using the BCP']
+ )
 
 # https://pythonhosted.org/PyQRCode/rendering.html
 # pip3 install pyqrcode
@@ -90,7 +97,7 @@ Python = s.content_imagelet('https://www.python.org/static/community_logos/pytho
 s.meta['Acknowledgements'] =f"""<h3>Acknowledgements:</h3>
 <ul>
     <li>Rick Adams and Karl Friston @ UCL - Wellcome Trust Centre for Neuroimaging</li>
-    <li>Mina Aliakbari Khoei and Anna Montagnini - FACETS-ITN Marie Curie Training</li>
+    <li>Jean-Bernard Damasse, Laurent Madelain and Anna Montagnini  - ANR REM</li>
 </ul>
 <BR>
 {Karl}{Mina}{Anna}<a href="https://github.com/laurentperrinet/slides.py">{Python}</a>
@@ -101,9 +108,14 @@ s.meta['Acknowledgements'] =f"""<h3>Acknowledgements:</h3>
 i_section = 0
 s.open_section()
 ###############################################################################
+s.open_section()
+#################################################################################
+## 🏄🏄🏄🏄🏄🏄🏄🏄 Intro - 5''  🏄🏄🏄🏄🏄🏄🏄🏄
+#################################################################################
+#################################################################################
 
 s.hide_slide(content=s.content_figures(
-    #[os.path.join(figpath_talk, 'qr.png')], bgcolor="black",
+    #[os.path.join(figpath_talkbcp, 'qr.png')], bgcolor="black",
     [os.path.join(figpath_slides, 'mire.png')], bgcolor=meta['bgcolor'],
     height=s.meta['height']*.90),
     #image_fname=os.path.join(figpath_aSPEM, 'mire.png'),
@@ -111,7 +123,7 @@ s.hide_slide(content=s.content_figures(
 Check-list:
 -----------
 
-* (before) bring VGA adaptors, AC plug, remote, pointer
+* (before) bring miniDVI adaptors, AC plug, remote, pointer
 * (avoid distractions) turn off airport, screen-saver, mobile, sound, ... other running applications...
 * (VP) open monitor preferences / calibrate / title page
 * (timer) start up timer
@@ -125,431 +137,689 @@ intro = """
 <h2 class="title">{title}</h2>
 <h3>{author_link}</h3>
 """.format(**meta)
+# intro += s.content_figures(
+# [os.path.join(figpath_aSPEM, "troislogos.png")], bgcolor="black",
+# height=s.meta['height']*.2, width=s.meta['height']*.75)
 intro += s.content_imagelet(os.path.join(figpath_slides, "troislogos.png"), s.meta['height']*.2) #bgcolor="black",
+#intro += s.content_imagelet(os.path.join(figpath_talkbcp, 'qr.png'), s.meta['height']*.2) #bgcolor="black",
+# height=s.meta['height']*.2, width=s.meta['height']*.2)
+#
 intro += """
-{Acknowledgements}
 <h4><a href="{conference_url}">{conference}</a>, {DD}/{MM}/{YYYY} </h4>
+{Acknowledgements}
 """.format(**meta)
 
-s.hide_slide(content=intro)
+s.add_slide(content=intro,
+        notes="""
+* (AUTHOR) Hi, I am Laurent Perrinet from (LOGO) the Institute de Neurosciences de la Timone in Marseille, a joint unit from the CNRS and AMU. Using computational models, I am investigating the link between the efficiency of behavioural responses in vision, their underlying neural code and their adaptation to the structure of the world.
 
-s.hide_slide(content=s.content_figures([figname], cell_bgcolor=meta['bgcolor'], height=s.meta['height']*height_ratio) + '<BR><a href="{url}"> {url} </a>'.format(url=meta['url']),
-            notes=" All the material is available online - please flash this QRcode this leads to a page with links to further references and code ")
+* (SHOW TITLE - THEME) = In particular, I will try to give some principles of active inference, framed in a practical example of a dynamic, poissbly volatile environment and how we may use it to anticipate ---- and my main goal in general is to illustrate how this theory may give a creative and efficient tool to do psychophysics.
+
+""")
+
+
+
+s.add_slide(content=s.content_figures([figname], cell_bgcolor=meta['bgcolor'], height=s.meta['height']*height_ratio) + '<BR><a href="{url}"> {url} </a>'.format(url= meta['url']),
+notes=" All the material is available online - please flash this QRcode this leads to a page with links to further references and code ")
 
 s.add_slide(content=intro,
-            notes="""
-* (AUTHOR) Hello, I am Laurent Perrinet from the Institute of Neurosciences of
-la Timone in Marseille, a joint unit from the CNRS and the AMU
-
-* (OBJECTIVE) in this talk, I will be focus in highlighting
-some key challenges in understanding visual perception
-in terams of efficient coding
-using modelization and neural data
-* please interrupt
-
-* (ACKNO) this endeavour involves different techniques and tools ...
-From the head on, I wish to thanks people who collaborated  and in particular ..
-  mostly funded by the ANR horizontal V1
-(fregnac chavane) + ANR TRAJECTORY (o marrre bruno cessac palacios )
-+ LONDON (Jim Bednar, Friston)
-
-* (SHOW TITLE) I am interested in ...
+    notes="""
+* (ACKNO) this endeavour involves different techniques, tools and... persons. From the head on, I wish to acknowledezg Chloe and Anna for doing most of this work +  thank the people who collaborated directly or indeirectly to this project and in particular Berk Mirza, Rick Adams and Karl Friston and the Wellcome Trust Centre for Neuroimaging for providing the tools for a successful visit and finally Jean-Bernard and Laurent Madelain for their essential knowledge in adaptation and reinforcement.
 
 """)
-
-
-review_bib = s.content_bib("LP", "2015", '"Sparse models" in <a href="http://invibe.net/LaurentPerrinet/Publications/Perrinet15bicv">Biologically Inspired Computer Vision</a>')
-
-figpath = os.path.join(home, 'Desktop/2017-01_LACONEU/figures/')
-s.add_slide(content="""
-    <video controls loop width=60%/>
-      <source type="video/mp4" src="{}">
-    </video>
-    """.format('https://raw.githubusercontent.com/laurentperrinet/2019-01-16_LACONEU/master/figures/v1_tiger.mp4')+review_bib,
-            notes="""
-... this video shows this intuition in a quantitative way. from a natural image,
-we extracted independent sources as individual edges at different scales and
-orientations
-
-when we reconstruct this image frame by frame (see N)
-we can quickly recognize the image
-
-natural images are sparse
-""")
-
-
-s.add_slide(content="""
-    <video controls loop width=60%/>
-      <source type="video/mp4" src="{}">
-    </video>
-    """.format('https://raw.githubusercontent.com/laurentperrinet/2019-01-16_LACONEU/master/figures/ssc.mp4')+review_bib)
-
-#
-s.add_slide(content=s.content_figures(
-   [os.path.join(home, 'pool/science/PerrinetBednar15/talk/scheme_thorpe.jpg')], bgcolor="black",
-   height=s.meta['height']*.90),
-notes="""
-
- * today, I would like  to focus on a particular problem which will help us unravel the dynamics of decision making: oculomotor delays. Indeed, one challenge for modelling is to understand EMs using AI as a problem of optimal motor control under axonal delays. The central nervous system has to contend with axonal delays, both at the sensory and the motor levels. For instance, in the human visuo-oculomotor system, it takes approximately $ \tau_s=50~ms$ for the retinal image to reach the visual areas implicated in motion detection, and a further $ \tau_m=40~ms $ to reach the oculomotor muscles.
-
- * challenging - see Thorpe's monkey
-
- * how does this impact behaviour?
- """)
-
-figpath_2017 = os.path.join(home, 'Desktop/2017-01_LACONEU/figures/')
-
-s.add_slide(content=s.content_figures(
-   [os.path.join(figpath_2017, 'tsonga.png')], bgcolor="black",
-   height=s.meta['height']*.90),
-   notes="""
-
-
-* ... As a consequence, for a tennis player ---here (highly trained) Jo-Wilfried Tsonga at Wimbledon--- trying to intercept a passing-shot ball at a (conservative) speed of $20~m.s^{-1}$, the position sensed on the retinal space corresponds to the instant when its image formed on the photoreceptors of the retina and reaches our hypothetical motion perception area behind:
-
- """)
-s.add_slide(content=s.content_figures(
-   [os.path.join(figpath_2017, 'figure-tsonga.png')], bgcolor="black",
-   height=s.meta['height']*.90),
-   #image_fname=os.path.join(figpath, 'figure-tsonga.png'), embed=False,
-       notes="""
-
-* and at this instant, the sensed physical position is lagging behind (as represented here by $\tau_s \cdot v 1~m$ ), that is, approximately at $45$ degrees of eccentricity (red dotted line),
-
-* while the  position at the moment of emitting the motor command will be $.8~m$ ahead of its present physical position ($\tau_m \cdot v$).
-
-* As a consequence, note that the player's gaze is directed to the ball at its **present** position (red  line), in anticipatory fashion. Optimal control directs action (future motion  of the eye) to the expected position (red dashed line) of the ball in the  future --- and the racket (black dashed line) to the expected position of the  ball when motor commands reach the periphery (muscles). This is obviously an interesting challenge for modelling an optimal control theory.
-
-""")
-
-s.add_slide(content=s.content_figures(
-   [os.path.join(figpath_2017, 'back-to-the-future-quotes-dr-emmett-brown.jpg')], bgcolor="black",
-   height=s.meta['height']*.90),#)
-
-# s.add_slide(content=s.content_figures(
-#    [os.path.join(figpath, 'figure-tsonga-AB.png')], bgcolor="black",
-#    height=s.meta['height']*.90),
-   #image_fname=os.path.join(figpath, 'figure-tsonga-AB.png'),  embed=False,
-#s.add_slide_outline(
-notes="""
-WOW! THIS LOOKS COMPLICATED!
-
-Luckily, we can integrat'e that in the free-energy formalism
- """)
-
 
 s.close_section()
 
+# /Users/laurentperrinet/pool/AME_is_AnalyseModelisationExperimentation_Chloe/AnticipatorySPEM
+figpath_GDR = os.path.join(home, 'pool/AME_is_AnalyseModelisationExperimentation_Chloe/AnticipatorySPEM/Poster/2017-11-24_Poster_GDR_Robotique/figures')
+figpath_overleaf = os.path.join(home, 'pool/AME_is_AnalyseModelisationExperimentation_Chloe/AnticipatorySPEM/overleaf/figures')
+figpath_aSPEM = os.path.join(home, 'pool/AME_is_AnalyseModelisationExperimentation_Chloe/AnticipatorySPEM/figures')
+
 i_section += 1
-###############################################################################
-# 🏄🏄🏄🏄🏄🏄🏄🏄              Active inference               🏄🏄🏄🏄🏄🏄🏄🏄
-###############################################################################
-###############################################################################
+#################################################################################
+## 🏄🏄🏄🏄🏄🏄🏄🏄 MOTIVATION - 10''  🏄🏄🏄🏄🏄🏄🏄🏄
+#################################################################################
+#################################################################################
+
 s.open_section()
-title = meta['sections'][i_section]
-s.add_slide_outline(i_section,
+title = meta['sections'][i_section-1]
+s.add_slide_outline(i_section-1, notes="""
+* Let's me first describe the motivation of this work...
+
+* We live in a fundamentally volatile world - Think for instance to the evolution  of prices on the stock market: Any Socio-economic contextual index may make the price evolve up or down, slowly or more Rapidly ...
+
+* Take for instance this very common source of information of the text of all tweets by Donald Trump In a last few years. It's just a Cheap Way Of accessing Big data if you'd prefer - If now I crossed time we extract other tweetsWhich contained onto not containA list of words that please selected
+
+""")
+#
+#     for txt in ['fixed', 'hindsight']:
+#         s.add_slide(content=s.content_figures(
+#         [os.path.join(figpath_aSPEM, 'trump_' + txt + '.png')],
+#                 title=title + ' - a Real-life example', height=s.meta['height']*.825),
+#     notes="""
+#
+#  * When plotting The occurrence of theses words As a function of time smoothed in a small Time window We may guess that there is some tendenciesWhichHappen toBelong to different blocks
+#
+#  * On way to think about The way These words are used is that This words appear with different a priori probabilities In time And  that the context that drives this probabitlities Is changing In different blocks Which is corresponds to different contexts: a pre-election phase,
+#
+# * This may look like this boxes That a plot here as a function of time. Such a representation allows to anticipate = infer for future outcomes but more importantly to better understand The motives behind the context and use of these words (if any)
+#
+#     """)
+#
+bib =  'Montagnini A, Souto D, and Masson GS (2010) <a href="http://jov.arvojournals.org/article.aspx?articleid=2138664">J Vis (VSS Abstracts) 10(7):554</a>,<BR> Montagnini A, Perrinet L, and Masson GS (2015) <a href="https://arxiv.org/abs/1611.07831">BICV book chapter</a>'
+
+s.add_slide(content=s.content_figures(
+[os.path.join(figpath_overleaf, '1_A_protocol_recording.png')],
+        title=title + ' - Eye Movements', height=s.meta['height']*.825) + bib,
 notes="""
-Let's set up the problem
+* This was shown to happen in the more  experimental setting While recording smooth pursuit eye movements : Anna Montagnini has previously shown that if you use a probabilistic bias in the direction of the movement of the target, the the eye will (uncousciously) anticipate in the direction of this bias.
+
+* this protocol used a random length fixation period then a pause of fixed duration, and then a traget moving at 15 deg / s
+
+* the value p gives the probability of going to the right : at .5 it is unbisaed, and at .75 for instance it goes 75% to the right and 25% to the left
 """)
 
-#     figpath = 'figures/'
-#     # karl_bib = s.content_bib("Friston", "2010", "Nat Neuro Reviews")
-#
-#     s.add_slide(content=s.content_figures(
-#       [os.path.join(figpath, 'figure-tsonga-B.png')], bgcolor="black",
-#       height=s.meta['height']*.90),
-#       #image_fname=os.path.join(figpath, 'figure-tsonga-AB.png'),
-#        notes="""
-#
-# In that order, we will now show how to include oculomotor delays
-#
-# and include constraints from EMs as a model for a generic model of decision making
-#
-# thanks to a one year sabbatical visit at Karl Friston's lab in London at the WTCI UCL and in collaboration with Rick Adams, I have had the chance to collaborate in the ellaboration of a series of studies on Active inference and EMs:
-#
-# """)
+for txt in ['1', '2']:
+    s.add_slide(content=s.content_figures(
+[os.path.join(figpath_GDR, 'image_anna_' + txt + '.png')],
+            title=title + ' - Eye Movements', height=s.meta['height']*.825),
+   notes="""
 
-# s.add_slide(content=s.content_figures(
-# [os.path.join(figpath, 'friston10c_fig4.png')], bgcolor="black",
-# title=title, height=s.meta['height']*.6) + karl_bib,
+* we show in this plot the velocity of the eye that she recorded when tracking the target.
+
+* we observe that as you depart from .5, there is an anticipatory component to the SPEM
+
+* Moreover, she has proved that this behaviour is progressive and increases with the value of p
+
+""")
+#
+# for tag, notes_ in zip(['Experiment_randomblock_', 'Experiment_classique_', 'Experiment_randomblock_'], ["""
+# * our initial goal was to extend these results to a more volatile environment. This Is well described by a three layered architecture decribing the evolution of outcomes (left or right) as a function of the trial number in an experimental block:
+#
+# - at the bottom we have switches, that is moments were we know that there was a change in context:
+#
+# - then we have an intermediate layer which describes this context as the probability p which defines the bias towards one direction. as switches happen at random times but with a given hazard rate, blocks are of average length of here 40.
+#
+# - finally, we draw the directions as a sequences of binary events following this bernouilli trials
+#
+# If we draw another exmple of this generative model
+# ""","""
+#
+# This has to be put in contrast with a more classical protocol such as that used in the previously described experiment where different blocks of fixed length were drawn, but with different probabilities.
+#
+# ""","""
+#
+# Here, we
+#
+# """]):
+#     for txt in [str(i) for i in range(4)[::-1]]:
+#         s.add_slide(content=s.content_figures(
+#     [os.path.join(figpath_aSPEM, tag + txt + '.png')],
+#                 title=title + ' - Eye Movements', height=s.meta['height']*.775),
+#        notes=notes_)
+
+s.add_slide(content=s.content_figures(
+[os.path.join(figpath_aSPEM, 'Experiment/Experiment_randomblock.png')],
+        title=title + ' - Random-length block design', height=s.meta['height']*.825),
+notes="""
+
+In summary, the design of our experimental setting is therefore very similar to the previous experiment but with a more general construct:
+
+- using the same 3-layered generative model, we generated sequences of directions
+
+- and generated 3 blocks of 200 trials
+
+- with an average block length of 40 trials
+
+We anticipated that such an  experiment for which we simply recordedd the eye movements should be more difficult for observers compared to the classical experiments with longer (400 trials), fixed blocks and...
+
+
+""")
+
+s.add_slide(content=s.content_figures(
+[os.path.join(figpath_aSPEM, 'protocol/protocol_bet.png')],
+        title=title + ' - Random-length block design', height=s.meta['height']*.825),
+notes="""
+
+This is why we added a supplementary experiment for each observer but on a different day for which we asked at every trial to give a subjective, conscious evaluation of the direction of the next trial + a confidence about this inference. Once this information given by the subject, we were showing the actual outcome.
+
+Interestingly, we used exactly the same sequence, allowing to make a direc comparison of the results of both experiments
+
+We called this experiment the bet experiment.
+
+
+""")
+s.close_section()
+
+
+i_section += 1
+#################################################################################
+## 🏄🏄🏄🏄🏄🏄🏄🏄 RAW RESULTS - 10''  🏄🏄🏄🏄🏄🏄🏄🏄
+#################################################################################
+#################################################################################
+
+s.open_section()
+############################################################################
+title = meta['sections'][i_section-1]
+s.add_slide_outline(i_section-1, notes="")
+
+url =  'full code @ <a href="https://github.com/chloepasturel/AnticipatorySPEM">github.com/chloepasturel/AnticipatorySPEM</a>'
+
+s.add_slide(content=s.content_figures(
+[os.path.join(figpath_aSPEM, 'Experiment/Experiment_randomblock.png')],
+        title=title + ' - Random-length block design', height=s.meta['height']*.825) + url,
+notes="""
+
+* the whole experiment was coded by Chloé using :
+- python for the generative model,
+- the psychopy library for the stimulus display + connection to the eyelink 1000 that we used to record EMs
+- numpy, pandas and pylab for the data analysis
+
+* all this code is available : for running the experiments, re-analyzing the data and doing all plots are on github
+
+
+Let's now have a look at the raw psychophysical results..
+
+""")
+
+
+s.add_slide(content=s.content_figures(
+[os.path.join(figpath_aSPEM, 'Experiment/Experiment_randomblock_bet.png')],
+        title=title, height=s.meta['height']*.825) + url,
+notes="""
+First, we overlay the results of the bet result for one of the 12 subjects
+
+We rescaled th value given by the observer so that it fits to 0 (sure it goes left) to 1 (sure it goes right)
+
+We observe a pretty good fit of this trace as a function of trial number
+
+
+In particular, we see 2 main effects:
+- results are more variable when the bias is around .5 than when it is high (close to zero or one)
+- switches were detected quite rapidly but with a certain delay of a few trials. Indeed, note that this plot shows the entire sequence but that observers had only access to some internal representation of the memory of the previous observations. When faced with some new observations, the observer has to constantly adapt his response to either exploit this information by considering that this observation belongs to the same sub-block or to explore a novel hypothesis. This compromise is one of the crucial component that we wish to explore.
+
+Let's now have a look at EMs...
+
+""")
+
+
+# for txt in ['results_pari', 'results_enregistrement']:
+#     s.add_slide(content=s.content_figures(
+# [os.path.join(figpath_GDR, txt + '.png')],
+#             title=title, height=s.meta['height']*.825),
 #    notes="""
 #
-# As we now all know, the ...
+# """)
+
+
+for txt in ['raw/raw_trace', 'raw/raw_fitted']: # 'raw_fit',
+    s.add_slide(content=s.content_figures(
+[os.path.join(figpath_aSPEM, txt + '.png')],
+            title=title + ' - Fitting eye movements', height=s.meta['height']*.825) + url,
+   notes="""
+
+I show here a typical velocity traces for one subject / 2 trials
+
+- x-axis is time in milliseconds aligned on target onset, and we show respectively from left to right the fixation in gray, the GAP in pink (300ms) and the run in light gray.
+
+- y-axis is the velocity as computed as the gradient of position. Remark that the eyelink provides with the periods of saccades or blinks that we removed from the signal. it is quite noisy and to complement existing signal processing methods, Chloe implemented a robust
+
+- fitting method which allows to extract some key components of the velocity traces: maximum speed, latency, temporal inertia ($\tau$) and most interestingly acceleration before motion onset. We cross-validated that this method was givinfg similar results to other classical methods but in a more robust fashion/
+
+While being sensible to recording errors, this allows us to extract the anticipatory component of SPEMs and..
+
+""")
+
+s.add_slide(content=s.content_figures(
+[os.path.join(figpath_aSPEM, 'Experiment/Experiment_randomblock_EM.png')],
+        title=title, height=s.meta['height']*.825) + url,
+notes="""
+
+* I show here the overlay of this variable on the plot of probability biases
+
+* these accelarations values were here scaled according to their extremal values.
+
+* there seems to be a trend with the polarity of the acceleration being negative for p values below .5 and positive for values above .5
+
+
+
+""")
+
+s.add_slide(content=s.content_figures(
+[os.path.join(figpath_aSPEM, 'Experiment/Experiment_randomblock_bet_EM.png')],
+        title=title, height=s.meta['height']*.825) + url,
+notes="""
+
+... to make this clearer, and because we used the same sequence, we can overlay the results of both experiments in one plot:
+
+which qualitatively confirms such an intuition...
+
+""")
+
+for txt in ['P_real', 'p_bet--v_a']: # TODO : make a sequence to uncover parts
+    s.add_slide(content=s.content_figures(
+[os.path.join(figpath_GDR, txt + '.png')],
+            title=title, height=s.meta['height']*.75) + url,
+   notes="""
+* quantitatively, one can now plot the results for all subjects
+
+* the x-axis corresponds to the probability that was coded at the second layer and which is unknown to the observer
+* the y -axis shows either the bet or the
+* dots represent single responses - the saturation giving the identity of the observer
+
+we notice a quite nice linear correlation (black line) for both experiments; of the order of that found in the classical experiment with fixed blocks and a vartiety of bias values. This is surprising as the blocks are of random length, observer can still adapt to such a volatile environment.
+
+Another visualization, the scatter plot of acceleration  as a function of probability bet shows also that there is a correlation between both  variables.
+
+This allows to make a first point: it is possible to use more genreal models such as hierarchical generative models.
+
+However, while this results seem encouraging, a more finer analysis may be necessary.
+
+""")
+s.close_section()
+
+try:
+    os.mkdir(figpath_talkbcp)
+except:
+    pass
+
+# import bayesianchangepoint as bcp
+import numpy as np
+import matplotlib.pyplot as plt
+fig_width = 12
+
+i_section += 1
+#################################################################################
+## 🏄🏄🏄🏄🏄🏄🏄🏄 MODEL - 10''  🏄🏄🏄🏄🏄🏄🏄🏄
+#################################################################################
+#################################################################################
+
+s.open_section()
+s.add_slide_outline(i_section-1, notes="""
+Indeed, these raw psycholophysical results are encouraging but since we used a generative model for generating the sequence, let's see if we can build a Bayesian model which would be optimal wrt to this generative model.
+
+Indeed, such a model already exists, the onlin BCP, and we will adapt it for our specific setting.
+""")
+############################################################################
+title = meta['sections'][i_section-1]
+
+s.add_slide(content=s.content_figures(
+[os.path.join(figpath_aSPEM, 'Experiment/Experiment_randomblock.png')],
+        title=title + ' - Random-length block design', height=s.meta['height']*.825) + url,
+notes="""
+Let's remember our hierarchical generative model.
+
+At any given trial, we wish to construct an algorithm which
+
+We will introduce a fundamental component of Bayesian models : a latent variable
+
+this new variable will be used to test different hypothesis which will be evaluated to predict future states. it is called latent because it aims at representing a variable that is latent (or hidden) to the observer
+
+in our case, we will assume that the bayesian model knows about the structure of the generative model and we will set it to the current run-length $r$, that is, at any given trial, the hypothesis that the past r observations belong to the same block. of course a wrong choice of a latent variables (let's say the temperture in the experimental room) may give unexpected results, even is the bayesian model is "optimal" - an essential point to understand in bayesian inference
+
+""")
+
+s.add_slide(content="""
+Bayesian Online Changepoint Detector
+------------------------------------
+
+* an implementation of
+[Adams &amp; MacKay 2007 "Bayesian Online Changepoint Detection"](http://arxiv.org/abs/0710.3742)
+in Python.
+
+````
+@TECHREPORT{ adams-mackay-2007,
+AUTHOR = "Ryan Prescott Adams and David J.C. MacKay",
+TITLE  = "Bayesian Online Changepoint Detection",
+INSTITUTION = "University of Cambridge",
+ADDRESS = "Cambridge, UK",
+YEAR = "2007",
+NOTE = "arXiv:0710.3742v1 [stat.ML]",
+URL = "http://arxiv.org/abs/0710.3742"
+}
+````
+
+* adapted from https://github.com/JackKelly/bayesianchangepoint by Jack Kelly (2013) for a binomial input.
+
+* This code is based on the  [MATLAB implementation](http://www.inference.phy.cam.ac.uk/rpa23/changepoint.php) provided by Ryan Adam. Was available at http://hips.seas.harvard.edu/content/bayesian-online-changepoint-detection
+
+* full code @ https://github.com/laurentperrinet/bayesianchangepoint
+
+""", notes='', md=True)
+
+tag = 'BCP/bcp_model_layer_' #  'model_bcp_'
+blobs = ["""
+Initialize $P(r_0=0)=1$ and  $ν^{(0)}_1 = ν_{prior}$ and $χ^{(0)}_1 = χ_{prior}$
+""","""
+Observe New Datum $x_t$  and   Perform Prediction $P (x_{t+1} | x_{1:t}) =   P (x_{t+1}|x_{1:t} , r_t) \cdot P (r_t|x_{1:t})$
+<br<a href="http://arxiv.org/abs/0710.3742"Adams &amp; MacKay 2007 "Bayesian Online Changepoint Detection</a>
+""","""
+Evaluate (likelihood) Predictive Probability $π_{1:t} = P(x_t |ν^{(r)}_t,χ^{(r)}_t)$
+<br>
+Calculate Growth Probabilities $P(r_t=r_{t-1}+1, x_{1:t}) = P(r_{t-1}, x_{1:t-1}) \cdot π^{(r)}_t \cdot (1−h))$
+<br>
+<font color="FF0000">Calculate Changepoint Probabilities $P(r_t=0, x_{1:t})= \sum_{r_{t-1}} P(r_{t-1}, x_{1:t-1}) \cdot π^{(r)}_t \cdot h$
+</font>""","""
+Calculate Evidence $P(x_{1:t}) = \sum_{r_{t-1}} P (r_t, x_{1:t})$
+<br>
+Determine Run Length Distribution $P (r_t | x_{1:t}) = P (r_t, x_{1:t})/P (x_{1:t}) $
+""","""
+Update Sufficient Statistics :
+<br>
+$ν^{(r+1)}_{t+1} = ν^{(r)}_{t} +1$, $χ^{(r+1)}_{t+1} = χ^{(r)}_{t} + u(x_t)$
+<br>
+<font color="FF0000"> $ν^{(0)}_{t+1} = ν_{prior}$, $χ^{(0)}_{t+1} = χ_{prior}$</font>
+
+"""]
+for txt, blob, notes_ in zip([str(i) for i in range(1, 6)], blobs, ["""
+* in this graph information will be represented at different nodes. each node represent a belief which takes the form of a probability distribution over the set of parameters that we wish to describe.
+* it can be the mean and variance of a gaussain, but in general it will be 2 parameters. in our case, we wish to estimate p (between zero and one) - it is characterized by the beta distribution (mathematically it is the conjugate of the bernouilli distribution)
+* (mathematically, we will use th family of exponenetial distributions:, gaussians, binomials) among which the beta distribution belongs
+First, we initialize the first node to prior values
+* at trial zero, there is no information, so we intiialize to the prior values
+""","""
+
+""","""
+
+""","""
+
+""","""
+
+"""]):
+    s.add_slide(content=s.content_figures(
+[os.path.join(figpath_aSPEM, tag + txt + '.png')],
+            title=title, height=s.meta['height']*.775)+blob,
+   notes=notes_)
+
+# https://raw.githubusercontent.com/laurentperrinet/bayesianchangepoint/master/README.md
+
+s.add_slide(content="""
+<h2>Bayesian Changepoint Detector</h2>
+
+<ol>
+<li> Initialize
+</li>
+ <ul>
+  <li>
+   $P(r_0=0)=1$ and
+ </li>
+  <li>
+   $ν^{(0)}_1 = ν_{prior}$ and $χ^{(0)}_1 = χ_{prior}$
+ </li>
+  </ul>
+ <li>
+ Observe New Datum $x_t$
+</li>
+ <li>
+  Evaluate Predictive Probability $π_{1:t} = P(x_t |ν^{(r)}_t,χ^{(r)}_t)$
+</li>
+ <li>
+  Calculate Growth Probabilities $P(r_t=r_{t-1}+1, x_{1:t}) = P(r_{t-1}, x_{1:t-1}) \cdot π^{(r)}_t \cdot (1−H(r^{(r)}_{t-1}))$
+</li>
+ <li>
+  Calculate Changepoint Probabilities $P(r_t=0, x_{1:t})= \sum_{r_{t-1}} P(r_{t-1}, x_{1:t-1}) \cdot π^{(r)}_t \cdot H(r^{(r)}_{t-1})$
+</li>
+ <li>
+  Calculate Evidence $P(x_{1:t}) = \sum_{r_{t-1}} P (r_t, x_{1:t})$
+</li>
+ <li>
+  Determine Run Length Distribution $P (r_t | x_{1:t}) = P (r_t, x_{1:t})/P (x_{1:t}) $
+</li>
+ <li>
+  Update Sufficient Statistics :
+</li>
+ <ul>
+  <li>
+   $ν^{(0)}_{t+1} = ν_{prior}$, $χ^{(0)}_{t+1} = χ_{prior}$
+ </li>
+  <li>
+   $ν^{(r+1)}_{t+1} = ν^{(r)}_{t} +1$, $χ^{(r+1)}_{t+1} = χ^{(r)}_{t} + u(x_t)$
+ </li>
+  </ul>
+ <li>
+  Perform Prediction $P (x_{t+1} | x_{1:t}) =   P (x_{t+1}|x_{1:t} , r_t) \cdot P (r_t|x_{1:t})$
+</li>
+ <li>
+  go to (2)
+</li>
+ </ol>
+        """, notes='', md=False)
 #
-# Unification des theories computationnelles par la minimisation de l'energie libre (MEL).
-# Cette figure extraite de {Friston10c} represente la place central du principe de MEL dans l'ensemble des theories computationnelles. En particulier, on peut noter que les principes que nous avons detailles plus haut dans les chapitres precedents (reseaux de neurones heuristiques, principes d'optimisation, codage predictif, ...) peuvent se rapporter a ce langage commun. %
+# s.add_slide_summary(
+#         ['Go fullscreen using the f key',
+#          'You can have an overlook using the o key',
+#          'Navigate using the arrow keys',
+#          'see notes using $P(x) = \exp(i)$ the n key'
+#           'You can have an overlook using the o key',
+#           'Navigate using the arrow keys',
+#           'see notes using the n key'],
+#           title='The Bayesian Changepoint Algorithm', fragment=True,
+#                       notes="""
+# * and write notes using markdown
 #
-# ... when including action in such models, it becomes ...
+# """)
+url =  'full code @ <a href="https://github.com/laurentperrinet/bayesianchangepoint">github.com/laurentperrinet/bayesianchangepoint</a>'
+
+s.add_slide(content=s.content_figures(
+[os.path.join(figpath_talkbcp, 'github.png')],
+        title=title, height=s.meta['height']*.825) + url,
+notes="""
+
+""")
+
+modes = ['expectation', 'fixed', ] # 'max',  'expectation',#for mode in ['expectation']:#, 'max']:# for mode in ['expectation', 'max']:
+for mode, mode_txt in zip(['expectation', 'fixed', ], [' - Full model', ' - Fixed window', ]):
+
+    figname = os.path.join(figpath_talkbcp, 'bayesianchangepoint_' + mode + '.png')
+    if not os.path.isfile(figname):
+        print('Doing ', figname)
+        T = 400
+        p_gen = .25 * np.ones(T)
+        p_gen[100:300] = .75
+        np.random.seed(2018)
+        o = 1 * (p_gen > np.random.rand(T))
+
+        p_bar, r_bar, beliefs = bcp.inference(o, h=1/200, p0=.5)
+        # fig, axs = bcp.plot_inference(o, p_gen, p_bar, r_bar, beliefs, max_run_length=250, fixed_window_size=200, mode=mode, fig_width=fig_width)
+
+        if mode == 'fixed':
+            fig, axs = bcp.plot_inference(o, p_gen, p_bar, r_bar, beliefs, max_run_length=250, fixed_window_size=40, mode=mode, fig_width=fig_width)
+        else:
+            fig, axs = bcp.plot_inference(o, p_gen, p_bar, r_bar, beliefs, max_run_length=250, mode=mode, fig_width=fig_width)
+        fig.savefig(figname, dpi=400)
+
+    s.add_slide(content=s.content_figures([figname],
+                title=title + mode_txt, height=s.meta['height']*.825) + url,
+       notes="""
+Let's now see the application of our model to a simple synthetic example before applying it to the experimental protocol that we used in our two experiments
+
+
+- we show two panels, one below which displays the value of the belief for the different run-length, and one above where we will show the resaulting prediction of the next outcome.
+we obtain for any given sequence different values at the given trial in the form of columns for any possible run-length: the belief,
+and the sufficient statistics for the beta distirbution which allow to provide with an estimate of the current probability
+
+- first, we show the value of probability, low probabilities are blueish while high probabilities. at every trial, the agent evluates the value for the different possible run lengths, generating a column. by showing all columns we generate this image which shows the evaluation along the sequence of trials.
+
+- second we show above the sequence of observations that were shown to the agent in a light black line. the read line gives an evaluation of the most probable a posteriori probability as the probability to hte run-length the maximum a posteriori belief on the differettn beliefs about run-lengths. using the estimate of the precision at this
+
+We remark two main observations:
+
+- first, beliefs grow at the beginning along a linear ridge, as we begin our model by assuming there was a switch at time 0. Then we observe that at a switch (hidden to the model), the model
+such that belief is more stronlgly diffused until the probability
+
+-second, we may use this information to read-out the information the most probable probability and the confidence interval as shown by the red dashed lines (.05, and .95)
+
+
+This is in contrast with a fixed length model, for which
+- the delay will always be similar
+- there is no dynamic upDATE OF THE INFERRD probability
+
+
+as a summary, for any given sequnce, we get an estimate of the probability given by the ideal observer. we will now see how we can apply that to our experiemntal protocol.
+""")
+
+s.close_section()
+
+i_section += 1
+#################################################################################
+## 🏄🏄🏄🏄🏄🏄🏄🏄 RESULTS - 5''  🏄🏄🏄🏄🏄🏄🏄🏄
+#################################################################################
+#################################################################################
+
+s.open_section()
+s.add_slide_outline(i_section-1)
+############################################################################
+title = meta['sections'][i_section-1]
+
+# tag = 'bayesianchangepoint_'
+# s.add_slide(content=s.content_figures(
+#     [os.path.join(figpath_aSPEM, txt + '.png') for txt in [tag + 'm', tag + 'e']],
+#             title=title, height=s.meta['height']*.825, transpose=True, fragment=True),
+#    notes="""
 #
 # """)
 
-s.add_slide(content=s.content_figures(
-[os.path.join(figpath_2017, figname) for figname in ['Friston12.png', 'Adams12.png', 'PerrinetAdamsFriston14header_small.png']], bgcolor="black",
-#title=title,
-fragment=True,
-transpose=True, height=s.meta['height']*.75,
-url=['http://invibe.net/LaurentPerrinet/Publications/' + name for name in ['Friston12', 'Adams12', 'PerrinetAdamsFriston14']]),
-notes="""
-* in a first study, we have proposed that PERCEPTION (following Helmhotz 1866) is an active process of hypothesis testing by which we seek to confirm our predictive models of the (hidden) world: Active inference: (cite TITLE). In theory, one could find any prior to fit any experimental data, but the beauty of the theory comes from the simplicity of the models chosen to model the data at hand, such as saccades...
+for mode, mode_txt in zip(['expectation', 'fixed'], [' - Full model', ' - Fixed window', ]):
+    for i_block in range(3):
+        figname = os.path.join(figpath_talkbcp, 'bayesianchangepoint_exp_' + mode + '_' + str(i_block) + '.png')
+        if not os.path.isfile(figname):
+            print("Doing ", figname)
 
-* ... and even better if these models may find a possible correspondance into the neural anatomy and explain some deviation to a control  behaviour, such as that we modelled for understanding some aspects of the EMs of schizophrenic patients
+            seed = 42
+            np.random.seed(seed)
+            #N_time = 1000
+            #N_trials = 4
 
-* Today, I will again focus on the problem of sensorimotor delays in the optimal control of (smooth) eye movements under uncertainty. Specifically, we consider delays in the visuo-oculomotor loop and their implications for active inference and I will present the results presented in the following paper (show TITLE).
+            tau = 25.
+            N_blocks = 3 # 4 blocks avant
+            seed = 51 #119 #2017
+            N_trials = 200
+            tau = N_trials/5.
+            (trials, p) = bcp.switching_binomial_motion(N_trials=N_trials, N_blocks=N_blocks, tau=tau, seed=seed)
 
+            h = 1./tau # a.exp['tau']
+            print('this experiment uses', N_trials, 'trials and a switch rate of h=', h, '(that is, one switch every', 1/h, 'trials on average)')
+            print('i_block=', i_block)
+            o = p[:, i_block, 0]
+            p_bar, r_bar, beliefs = bcp.inference(o, h=h, p0=.5)
+            if mode == 'fixed':
+                fig, axs = bcp.plot_inference(p[:, i_block, 0], p[:, i_block, 1], p_bar, r_bar, beliefs, max_run_length=200, fixed_window_size=40, mode=mode, fig_width=fig_width)
+            else:
+                fig, axs = bcp.plot_inference(p[:, i_block, 0], p[:, i_block, 1], p_bar, r_bar, beliefs, max_run_length=200, mode=mode, fig_width=fig_width)
+            fig.savefig(figname, dpi=400)
+
+        s.add_slide(content=s.content_figures([figname],
+                    title=title +  mode_txt, #' - inference with BCP',
+                    height=s.meta['height']*.825) + url,
+           notes="""
+           Let's use our model on the different sequences that were generated in our experiments in the different blocks.
+
+we the same arrangement of panels, we show below the dynamical evolution of beliefs and above the resulting readout from the model
+
+we see that as in the synthetic example above, there is a correct detection of switch after a short delay of a few trials
+
+in particular, from this correct detection, the value of the inferred probability approaches the true one as the number of observations increase in one subblock.
+
+again, we see that a fixed length model gives a similar output but with the two disadvantages described above
+
+Let's now see how this applies to our experimental results by comparing human observers to our bayesian agent.
 """)
+# tag = 'results_bayesianchangepoint_'
+# for txt in [tag + 'm', tag + 'e']:
+#     s.add_slide(content=s.content_figures(
+#         [os.path.join(figpath_ms, txt + '.png')],
+#         # [os.path.join(figpath_aSPEM, txt + '.png')],
+#                 title=title, height=s.meta['height']*.825),
+#        notes="""
+#
+#     """)
 
-
-# figpath = os.path.join(home, 'tmp/2015_RTC/2014-12-31_PerrinetAdamsFriston14/poster/12-06-25_AREADNE/')
-freemove_bib = s.content_bib("LP, Adams and Friston", "2015", 'Biological Cybernetics, <a href="http://invibe.net/LaurentPerrinet/Publications/PerrinetAdamsFriston14">http://invibe.net/LaurentPerrinet/Publications/PerrinetAdamsFriston14</a>')
-
-#for fname in ['figure1.png', 'figure2.png']:
-# figpath = os.path.join(home, 'quantic/2016_science/2016-10-13_LAW/figures')
-for fname, note in zip(['friston_figure1.png', 'friston_figure2.png', 'PAF14equations.png', 'PAF14equations2.png'], ["""
-
-* This schematic shows the dependencies among various quantities modelling exchanges of an agent with the environment. It shows the states of the environment and the system in terms of a probabilistic dependency graph, where connections denote directed (causal) dependencies. The quantities are described within the nodes of this graph -- with exemplar forms for their dependencies on other variables.
-
-* Hidden (external) and internal states of the agent are separated by action and sensory states. Both action and internal states -- encoding a conditional probability density function over hidden states -- minimise free energy. Note that hidden states in the real world and the form of their dynamics can be different from that assumed by the generative model; (this is why hidden states are in bold. )
-""","""
-*  Active inference uses a generalisation of Kalman filtering to provide Bayes optimal estimates of hidden states and action in generalized coordinates of motion. As we have seen previously, the central nervous system has to contend with axonal delays, both at the sensory and the motor levels. Representing hidden states in generalized coordinates provides a simple way of compensating for both these delays.
-
-* This mathematical framework can be mapped to the anatomy of the visual system. Similar to the sketch that we have shown above, "compiling" (that is, solving) the equations of Free-energy minimization forms a set of coupled differential equations which correpond to different node along the visuo-oculomotor pathways.
-""","""
-
-* a novelty of our approach including known delays was to take advantage of genralized coordinates to create an operator $T$ to travel back and forth in time with a delay $\tau$. It is simply formed by using a Taylor expansion of the succesive orders in the generalized coordinates which takes this form in matrix form and thus simply by taking the exponential matrix form.
-""","""
-Applying such an operator to the FEM generates a slightly different and more complicated formulation but it is important to note that to compensate for delays, there is no change in the structure of the network but just in how the synaptic weights are tuned (similar to what we had done in the first part)
-
-* The efficacy of this scheme will be illustrated using neuronal simulations of pursuit initiation responses, with and without compensation.
-
-"""]):
-    s.add_slide(#image_fname=os.path.join(figpath, fname),
-    content=s.content_figures(
-[os.path.join(figpath_2017, fname)], bgcolor="black",
-#title=title,
- height=s.meta['height']*.90),# + freemove_bib,
-# >>> Lup IS HERE <<<
-notes=note)
-
-s.add_slide(content="""
-    <video controls autoplay loop width=99%/>
-      <source type="video/mp4" src="{}">
-    </video>
-    """.format(s.embed_video(os.path.join(figpath_2017, 'flash_lag_dot.mp4'))),
-notes="""
-
-Pursuit initiation
-
-""")
-#figpath = os.path.join(home, 'tmp/2015_RTC/2014-12-31_PerrinetAdamsFriston14/poster/12-06-25_AREADNE/')
-#for fname in ['Slide3.png', 'Slide4.png']:
-#figpath = os.path.join(home, 'tmp/2015_RTC/2014-04-17_HDR/friston/')
-for fname in ['friston_figure3.png',
-              'friston_figure4-A.png',
-              'friston_figure4-B.png',
-               'friston_figure4-C.png']:
-
-    s.add_slide(#image_fname=os.path.join(figpath, fname),
-    content=s.content_figures(
-[os.path.join(figpath_2017, fname)], bgcolor="black",
-#title=title,
- height=s.meta['height']*.90),# + freemove_bib,
-notes="""
-
-This figure reports the conditional estimates of hidden states and causes during the simulation of pursuit initiation, using a single rightward (positive) sweep of a visual target, while compensating for sensory motor delays. We will use the format of this figure in subsequent figures: the upper left panel shows the predicted sensory input (coloured lines) and sensory prediction errors (dotted red lines) along with the true values (broken black lines). Here, we see horizontal excursions of oculomotor angle (upper lines) and the angular position of the target in an intrinsic frame of reference (lower lines). This is effectively the distance of the target from the centre of gaze and reports the spatial lag of the target that is being followed (solid red line). One can see clearly the initial displacement of the target that is suppressed after a few hundred milliseconds. The sensory predictions are based upon the conditional expectations of hidden oculomotor (blue line) and target (red line) angular displacements shown on the upper right. The grey regions correspond to 90% Bayesian confidence intervals and the broken lines show the true values of these hidden states. One can see the motion that elicits following responses and the oculomotor excursion that follows with a short delay of about 64ms. The hidden cause of these displacements is shown with its conditional expectation on the lower left. The true cause and action are shown on the lower right. The action (blue line) is responsible for oculomotor displacements and is driven by the proprioceptive prediction errors.
-
-* This figure illustrates the effects of sensorimotor delays on pursuit initiation (red lines) in relation to compensated (optimal) active inference -- as shown in the previous figure (blue lines). The left panels show the true (solid lines) and estimated sensory input (dotted lines), while action is shown in the right panels. Under pure sensory delays (top row), one can see clearly the delay in sensory predictions, in relation to the true inputs. The thicker (solid and dotted) red lines correspond respectively to (true and predicted) proprioceptive input, reflecting oculomotor displacement. The middle row shows the equivalent results with pure motor delays and the lower row presents the results with combined sensorimotor delays. Of note here is the failure of optimal control with oscillatory fluctuations in oculomotor trajectories, which become unstable under combined sensorimotor delays.
-
-""")
-
-#figpath = 'figures/'
-s.add_slide(content="""
-    <video controls autoplay loop width=99%/>
-      <source type="video/mp4" src="{}">
-    </video>
-    """.format(s.embed_video(os.path.join(figpath_2017, 'flash_lag_sin.mp4'))),
-notes="""
-
-Smooth Pursuit
-We then consider an extension of the generative model to simulate smooth pursuit eye movements --- in which the visuo-oculomotor system believes both the target and its centre of gaze are attracted to a (hidden) point moving in the visual field.
-""")
-#figpath = os.path.join(home, 'tmp/2015_RTC/2014-04-17_HDR/friston/')
-for fname in ['friston_figure6.png', 'friston_figure7.png']:
-    s.add_slide(#image_fname=os.path.join(figpath, fname),
-    content=s.content_figures(
-[os.path.join(figpath_2017, fname)], bgcolor="black",
-#title=title,
- height=s.meta['height']*.90),# + freemove_bib,
-notes="""
-
-
-* This figure uses the same format as the previous figure -- the only difference is that the target motion has been rectified so that it is (approximately) hemi-sinusoidal. The thing to note here is that the improved accuracy of the pursuit previously apparent at the onset of the second cycle of motion has now disappeared -- because active inference does not have access to the immediately preceding trajectory. This failure of an anticipatory improvement in tracking is contrary to empirical predictions. \item \odot
-
-* the generative model has been equipped with a second hierarchical level that contains hidden states, modelling latent periodic behaviour of the (hidden) causes of target motion. With this addition, the improvement in pursuit accuracy apparent at the onset of the second cycle of motion is reinstated. This is because the model has an internal representation of latent causes of target motion that can be called upon even when these causes are not expressed explicitly in the target trajectory.
-
-""")
-figpath = 'figures/'
-s.add_slide(content="""
-    <video controls autoplay loop width=99%/>
-      <source type="video/mp4" src="{}">
-    </video>
-    """.format(s.embed_video(os.path.join(figpath_2017, 'flash_lag_sin2.mp4'))),
-notes="""
-
-Smooth Pursuit with oclusion
-Finally, the generative model is equipped with a hierarchical structure, so that it can recognise and remember unseen (occluded) trajectories and emit anticipatory responses.
-""")
-#figpath = os.path.join(home, 'tmp/2015_RTC/2014-12-31_PerrinetAdamsFriston14/poster/12-06-25_AREADNE/')
-
-#figpath = os.path.join(home, 'tmp/2015_RTC/2014-04-17_HDR/friston/')
-for fname in ['friston_figure8.png', 'friston_figure9bis.png']:
-    s.add_slide(#image_fname=os.path.join(figpath, fname),
-    content=s.content_figures(
-[os.path.join(figpath_2017, fname)], bgcolor="black",
-#title=title,
- height=s.meta['height']*.90),# + freemove_bib,
-notes="""
-
-
-* This figure uses the same format as the previous figure -- the only difference is that the target motion has been rectified so that it is (approximately) hemi-sinusoidal. The thing to note here is that the improved accuracy of the pursuit previously apparent at the onset of the second cycle of motion has now disappeared -- because active inference does not have access to the immediately preceding trajectory. This failure of an anticipatory improvement in tracking is contrary to empirical predictions. \item \odot
-
-* the generative model has been equipped with a second hierarchical level that contains hidden states, modelling latent periodic behaviour of the (hidden) causes of target motion. With this addition, the improvement in pursuit accuracy apparent at the onset of the second cycle of motion is reinstated. This is because the model has an internal representation of latent causes of target motion that can be called upon even when these causes are not expressed explicitly in the target trajectory.
-
-""")
-
-s.close_section()
-
-i_section += 1
-###############################################################################
-# 🏄🏄🏄🏄🏄🏄🏄🏄         Back to the present - 15''              🏄🏄🏄🏄🏄🏄🏄🏄
-###############################################################################
-###############################################################################
-
-s.open_section()
-title = meta['sections'][i_section]
-s.add_slide_outline(i_section,
-notes="""
-let's move to the second part : at the cortical leval
-
-
-""")
-
-fle_bib = s.content_bib("Khoei, Masson and LP", "2017", 'PLoS CB', url="http://invibe.net/LaurentPerrinet/Publications/KhoeiMassonPerrinet17")
-
-s.add_slide(content="""
-    <video controls autoplay loop width=99%/>
-      <source type="video/mp4" src="{}">
-    </video>
-    """.format(s.embed_video(os.path.join(figpath_2017, 'flash_lag.mp4'))) + fle_bib,
-   notes="""
-
-so let's go back on earth
-
-* ... but first let now apply this model compensating for the aforementioned visual delays using a well described visual illusion: the flash-lag effect:
-
-a first stimulus moves continuously across the screen along the central horizontal axis. In the FLE, as this moving stimulus reaches the center of the screen, a second stimulus is flashed just above it and in perfect vertical alignment. Despite the fact that the respective horizontal positions of each stimulus are physically identical when the flash occurs, the moving stimulus is most often perceived *ahead* of the flashed one.
-
-debate for 80 years revived recently
-
-- motion extrapolation
-- differential latency
-- post-diction
-
-we propose to extend the hypothesis previously proposed by Nihjawan that this effect is caused by the extrapolation of the stimulus' motion to compensate for the neural delay. However, this hypothesis was challenged by other hypothesis that this effect is due to either anatomy (differential latencies) or to the way visual awareness processes the sequence of events (the post-diction from Eagleman)
-
-As a matter of fact, the motion extrapolation hypothesis was challenged because you can notice that the FLE is still present at initiation of the movement but this effect is not seen if the moving dot abruptly stops at the moment of the flash
-
-
-
-""")
-
-
-for txt in ['', '2']:
+# /Users/laurentperrinet/pool/AME_is_AnalyseModelisationExperimentation_Chloe/AnticipatorySPEM/figures/Result/Results_BCP_velocity_sujet_10.svg
+tag = 'Result/Results_BCP_position'
+tag = 'Result/Results_BCP_velocity'
+for txt in [str(i) for i in range(2)]:# [6, 10, 5, 2]]:
     s.add_slide(content=s.content_figures(
-[os.path.join(figpath_talk, 'FLE_DiagonalMarkov_simple' + txt + '.png')], title=title, height=s.meta['height']*.75) + fle_bib,
-   notes="""
-* Our model is very simple:  Following what Nihjawan called a "diagonal model", we have proposed to extend a motion-based predictive coding model by including the known sensory delay in the prediction-estimation loop
+        [os.path.join(figpath_aSPEM, tag + '_' + txt + '.png')],
+                title=title +  ' - fit with BCP', height=s.meta['height']*.825),
+       notes="""
+Among our 12 subjects, we show four representative examples. we will use the same figure as in the section with raw results
 
-* More formally, the estimated state vector $z = \{x, y, u, v\}$ is composed of the 2D position ($x$ and $y$) and velocity ($u$ and $v$) of a (possibly moving) stimulus. As such, we extend  Nijhawan's diagonal model into a classical Markov chain in order to take into account the known neural delay $\tau$: At time $t$, information is integrated until time $t-\tau$, using a Markov chain and a model of state transitions $p(z_t |z_{t-\delta t})$ such that one can infer the state until the last accessible information $p(z_{t-\tau} | I_{0:(t-\tau)})$. This information can then be ``pushed'' forward in time by predicting its trajectory from $t-\tau$ to $t$. Interestingly, we use the same model of state transition at the time scale of the delay, that is, $p(z_t | z_{t-\tau})$.
+but we superposed to our 2 variables, the value of the readout inferred probability along with the confidence interval.
 
-* Importantly, the model for transition is based on a simple model of the transport of visual information *knowing the velocity*. Indeed, knowing $z(t-\Delta t)$ we may infer the future position of this motion at time $t$ by using Newton's first law of mechanics. The precision of the state transition (as given by the shaded area) tunes the strength of this prediction as a diffusion parameter.
+compared to the raw results which were using the true (hidden) probability, it seems qualitatively that it follows well the traces observed experimenetally
+- first, both have similar delays in ddetercting a switch, reflecting the diuffusion of probability
+- second, precisions seems to increase in bigger sub-blocks as a function of the inferred run-length
 
-* Such a model can be implemented in a two-layered neural network including a source (input) and a target (predictive) layer~\citep{KaplanKhoei14}. The source layer receives the delayed sensory information and encodes both position and velocity topographically on the different retinotopic maps of each layer. Notice that here, for simplicity, we show only one 2D map of the motions $(x, v)$. Crucially, the delay compensation in this motion-based prediction model, is simply implemented by connecting each source neuron to a predictive neuron corresponding to the corrected position of stimulus $(x+v\cdot \tau, v)$ in the target layer. The precision of this anisotropic connectivity map can be tuned by the width of convergence from the source to the target populations. We will see on Friday that this property (that it is implemented in the connectivity) extends to more complex, multi-layered systems which may generalize to more complex trajectories.
+as a result, the inferred probability as a function of time constitutes a useful regressor
+    """)
 
-""")
-# * In particular we have used an efficient implementation using particle filtering and all the code for reproducing this theory is available on my github.
-
-
-for method in ['PBP', 'MBP']:
-    s.add_slide(content="""
-	    <h3> Results using {method} </h3>
-		            <div align="center">
-        <video controls autoplay loop width=61%/>
-          <source type="video/mp4" src="{urldata}">
-        </video>
-		</div>
-        """.format(method=method, urldata=s.embed_video(os.path.join(figpath_2017, method + '_spatial_readout.mp4'))),
-notes="""
-* Let me show you now the results of our simulations on the standard flash-lag stimulus by first showing the results of a predictive system with no delay compensation. We here simply show the source layer in the prediction model which tries to track moving patterns but do not compensate for the known delay.
-
-* We observe that the moving dot is correctly tracked and the flash correctly detected. I have slowed down the speed of the movie to show that relative to each other, the flash and moving dot appear at the same position at the time of the flash.
-
-* The situation is different in the motion-based predictive system : in this slowed down movie, at the time the flash appears, the dot's position was predicted *ahead* of the position of the flash, similarly to what is reported in psychophysics.
-
-* Moreover, we have predicted a similar effect with a large range of parameters of the stimulus, such as speed or contrast. But for the moment, let us focus on the reasons why the model shows a similar behavior
-
-""")
-
-# for fname in ['FLE', 'FLE_histogram', 'FLE_MotionReversal']:
-for fname in ['FLE_histogram', 'FLE_MotionReversal_MBP', 'FLE_MotionReversal']:
+for txt in ['P_real']: # TODO : make a sequence to uncover parts
     s.add_slide(content=s.content_figures(
-[os.path.join(figpath_talk, fname + '.png')], title=title,
-height=s.meta['height']*.8) + fle_bib,
+[os.path.join(figpath_GDR, txt + '.png')],
+            title=title, height=s.meta['height']*.75) + url,
    notes="""
 
-* For that, we replot the movies I have just shown by showing for the dot the Histogram of the estimated positions as a function of time for the source layer (Left) and the target layer (right). The left-hand column illustrates the predictive model before delay compensation. The right-hand column illustrates the motion extrapolation model with delay compensation. Histograms of the inferred horizontal positions (blueish bottom panel) and  horizontal speed (redish top panel) are shown in columns  as a function  of time. A darker level corresponds to a higher probability, while a light  color corresponds to an unlikely estimation. In particular, we focus on three  particular epochs along the trajectory, corresponding to the standard, flash  initiated and terminated cycles. The timing of these epochs flashes are indicated by  dashed vertical lines. In dark, the physical time and in green the delayed  input knowing $\tau=100~ms$.
+We may finally wrap up results and the model and plot
 
-* Activity in both models shows three different phases. First, there is a rapid  build-up of the precision of the target after the first appearance of the  moving dot (at $t=300~ms$). Consistently with the Frölich effect, the  beginning of the trajectory is seen ahead of its physical position. During the second phase, the moving dot is correctly tracked as both its velocity and position are correctly inferred. In the source layer, there is no extrapolation and the trajectory follows the delayed trajectory of the dot (green dotted line). In the target layer, motion extrapolation correctly predicts the position at the present time and the position follows the actual physical position of the dot (black dotted line). Finally, the third phase corresponds to  motion termination. The moving dot disappears and the corresponding activity vanishes in the source layer at $t=900~ms$. However, between $t=800~ms$ and $t=900~ms$, the dot position was extrapolated and predicted ahead of the terminal position. At $t=900~ms$, while motion information is absent, the position information is still transiently consistent and extrapolated using a broad, centered prior distribution of speeds. Although it is less precise, this position of the dot at flash termination is therefore not perceived as leading the flash.
+scatters plots are visually misleading as they do not show well the density of data points
 
-* Interestingly, and thanks to the reviewers of the paper, we could extend our results to the estimation of the dot position from the dMBP model during the motion reversal experiment. In the motion reversal experiment, the moving dot reverses its direction  at the middle of the trajectory (i.e., at $t=500~ms$,  as indicated by the mid-point vertical dashed line).  In the left column (target layer) and as in previous slide, we show the histogram of inferred positions  during the dot motion and a trace of its position with the highest probability  as a function of time.  As expected, results are identical to that in the previous slide in the first half period.  At the moment of the motion reversal,  the model output is consistent with previous psychophysical reports.  First, the estimated position follows the extrapolated trajectory  until the (delayed) sensory information about the motion reversal reaches the system  (at $t=600~ms$, green vertical dashed line).  Then, the velocity is quickly reseted and converges to the new (reversed) motion  such that the estimated position ``jumps'' to a position corresponding  to the updated velocity.  In the right column (smoothed layer), we show the results of the same data  after a smoothing operation of $\tau_s=100~ms$ in subjective time.  This different read-out from the inferred positions  corresponds to the behavioral results obtained in some experiments,  such as that from~\citet{Whitney98}.
+
 
 """)
+# TODO : average KDE
+tag = 'Result/kde_mean_position'
+for mode, mode_txt in zip(['fixed', 'expectation'], [' - Fixed window', ' - Full model']):
+# for mode in ['fixed', 'expectation']: #, 'max', modes: #
+    s.add_slide(content=s.content_figures(
+        [os.path.join(figpath_aSPEM, tag + '_' + mode + '.png')],
+                title=title + mode_txt, height=s.meta['height']*.7, transpose=False, fragment=True),
+       notes="""
+we therefore used a kernel density estimation which clearly show the relationship between the agent probability and that reported by human observers
+- on the right, we
+
+to summarize, we have shown that
+- there is a correlation in the anticiapatory response of eye movements in a volatile environment that is captured if we know the true probability
+- that a fixed length models captures some of this correlation, but that
+- our online bayesian changep[oint model better captures this correlation and that this may hint at the neural mechanisms used to anticipate in a dynamic environment
+
+the brain is not strongly a bayesian machine, but weakly
+
+
+
+perspectives:
+- interindividual differences
+- RL
+
+    """)
+# # TODO : average KDE
+# tag = 'kde_mean'
+# for txt in [str(k) for k in range(4)]:
+#     s.add_slide(content=s.content_figures(
+#         [os.path.join(figpath_aSPEM, tag + '_' + txt + '.png')],
+#                 title=title +  ' - fit with BCP', height=s.meta['height']*.7, transpose=False, fragment=True),
+#        notes="""
+#
+#     """)
 s.close_section()
 
 
-i_section += 1
-###############################################################################
-# 🏄🏄🏄🏄🏄🏄🏄🏄         Perspectives - 5''              🏄🏄🏄🏄🏄🏄🏄🏄
-###############################################################################
-###############################################################################
+#################################################################################
+## 🏄🏄🏄🏄🏄🏄🏄🏄 OUTRO - 5''  🏄🏄🏄🏄🏄🏄🏄🏄
+#################################################################################
+#################################################################################
 
-s.open_section()
-title = meta['sections'][i_section]
-s.add_slide_outline(i_section,
-notes="""
-what are the consequences?
-
-""")
-
-# https://invibe.net/LaurentPerrinet/Publications/Chemla18?highlight=%28%28TagAnrHorizontalV1%29%29
-# Chemla S, Reynaud A, di Volo M, Zerlaut Y, Perrinet L, Destexhe A, Chavane F. Suppressive waves disambiguate the representation of long-range apparent motion in awake monkey V1, URL . 2018 abstract.
-
-# benvenuti & Taouali
-
-# waves with B. Cessac
-
-s.close_section()
-
-###############################################################################
-# 🏄🏄🏄🏄🏄🏄🏄🏄 OUTRO - 5''  🏄🏄🏄🏄🏄🏄🏄🏄
-###############################################################################
-###############################################################################
 s.open_section()
 s.add_slide(content=intro,
-            notes="""
-
-
+    notes="""
 * Thanks for your attention!
 """)
+#
+# s.add_slide(content=s.content_figures([figname],
+#         title='', height=s.meta['height']*.825),
+# notes="""
+#
+# """)
+
 s.close_section()
 
 
