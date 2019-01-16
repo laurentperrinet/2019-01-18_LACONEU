@@ -1,1 +1,6 @@
-# 2019-01-18_LACONEU
+# 2019-01-18_LACONEU :  Role of dynamics in neural  computations underlying  visual processing
+
+  * see http://laconeu.cl/wp-content/uploads/2019/01/program.pdf
+  * full info @ https://invibe.net/LaurentPerrinet/Presentations/2019-01-18_LACONEU
+  * slides @ https://laurentperrinet.github.io/2019-01-18_LACONEU/
+  * code @ https://github.com/laurentperrinet/2019-01-18_LACONEU    
