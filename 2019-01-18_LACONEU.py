@@ -48,7 +48,7 @@ meta = dict(
  theme='simple',
  bgcolor="white",
  author='Laurent Perrinet, INT',
- author_link='<a href="http://invibe.net">Laurent Perrinet</a>',
+ author_link='<a href="https://laurentperrinet.github.io">Laurent Perrinet</a>',
  short_title='Should I stay or should I go? Adaption of human observers to the volatility of visual inputs',
  title='Should I stay or should I go? Adaption of human observers to the volatility of visual inputs',
  conference_url='http://www.laconeu.cl',
@@ -57,7 +57,7 @@ meta = dict(
  location='Valparaiso (Chile)',
  YYYY=YYYY, MM=MM, DD=DD,
  tag=tag,
- url='http://invibe.net/LaurentPerrinet/Presentations/' + tag,
+ url=f'https://laurentperrinet.github.io/{tag}',
  abstract="""
 """,
 wiki_extras="""
@@ -831,12 +831,6 @@ if slides_filename is None:
 
 = {title}  =
 
- Quoi:: [[{conference_url}|{conference}]]
- Qui:: {author}
- Quand:: {DD}/{MM}/{YYYY}
- Où:: {location}
- Support visuel:: https://laurentperrinet.github.io/{tag}
-
 
  What:: talk @ the [[{conference_url}|{conference}]]
  Who:: {author}
@@ -844,6 +838,7 @@ if slides_filename is None:
  Where:: {location}
  Slides:: https://laurentperrinet.github.io/{tag}
  Code:: https://github.com/laurentperrinet/{tag}/
+ 
 == reference ==
 {{{{{{
 #!bibtex
