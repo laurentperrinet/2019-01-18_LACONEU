@@ -33,7 +33,7 @@ DD = int(tag[8:10])
 # see https://github.com/laurentperrinet/slides.py
 from slides import Slides
 
-height_px = 80
+height_px = 160
 height_ratio = .7
 
 meta = dict(
@@ -89,19 +89,22 @@ if not os.path.isfile(figname):
 print(meta['sections'])
 
 s = Slides(meta)
-figpath_people = os.path.join(home, 'Desktop/2017-01_LACONEU/people')
+figpath_people = os.path.join(home, 'ownCNRS/2019-01_LACONEU/people')
 Karl = s.content_imagelet(os.path.join(figpath_people, 'karl.jpg'), height_px)
 Mina = s.content_imagelet(os.path.join(figpath_people, 'mina.jpg'), height_px)
 Anna = s.content_imagelet(os.path.join(figpath_people, 'anna.jpg'), height_px)
+Fredo = s.content_imagelet(os.path.join(figpath_people, 'fredo.png'), height_px)
 Python = s.content_imagelet('https://www.python.org/static/community_logos/python-powered-h-140x182.png', height_px)
 s.meta['Acknowledgements'] =f"""<h3>Acknowledgements:</h3>
 <ul>
     <li>Rick Adams and Karl Friston @ UCL - Wellcome Trust Centre for Neuroimaging</li>
     <li>Jean-Bernard Damasse, Laurent Madelain and Anna Montagnini  - ANR REM</li>
+    <li>Frédéric CHAVANE - INT</li>
 </ul>
 <BR>
-{Karl}{Mina}{Anna}<a href="https://github.com/laurentperrinet/slides.py">{Python}</a>
+{Karl}{Mina}{Anna}{Fredo}<a href="https://github.com/laurentperrinet/slides.py">{Python}</a>
 """
+
 ###############################################################################
 # 🏄🏄🏄🏄🏄🏄🏄🏄         intro  - motivation - teaser        🏄🏄🏄🏄🏄🏄🏄🏄
 ###############################################################################
@@ -838,7 +841,7 @@ if slides_filename is None:
  Where:: {location}
  Slides:: https://laurentperrinet.github.io/{tag}
  Code:: https://github.com/laurentperrinet/{tag}/
- 
+
 == reference ==
 {{{{{{
 #!bibtex
