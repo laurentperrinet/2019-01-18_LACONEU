@@ -426,7 +426,7 @@ try:
 except:
     pass
 
-# import bayesianchangepoint as bcp
+import bayesianchangepoint as bcp
 import numpy as np
 import matplotlib.pyplot as plt
 fig_width = 12
