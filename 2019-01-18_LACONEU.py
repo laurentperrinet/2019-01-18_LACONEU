@@ -187,9 +187,7 @@ title = meta['sections'][i_section-1]
 s.add_slide_outline(i_section-1, notes="""
 * Let's me first describe the motivation of this work...
 
-* We live in a fundamentally volatile world - Think for instance to the evolution  of prices on the stock market: Any Socio-economic contextual index may make the price evolve up or down, slowly or more Rapidly ...
-
-* Take for instance this very common source of information of the text of all tweets by Donald Trump In a last few years. It's just a Cheap Way Of accessing Big data if you'd prefer - If now I crossed time we extract other tweetsWhich contained onto not containA list of words that please selected
+* We live in a fundamentally volatile world - Think for instance to a medical doctor
 
 """)
 #
