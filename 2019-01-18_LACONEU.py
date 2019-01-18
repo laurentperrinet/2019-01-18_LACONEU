@@ -796,7 +796,7 @@ perspectives:
 
 s.add_slide(content=s.content_figures(
     [os.path.join(figpath_overleaf, '5_inter-individual_differences_fit.png')],
-            title=title + mode_txt, height=s.meta['height']*.7, transpose=False, fragment=True),
+            title=title + 'interindividual differences', height=s.meta['height']*.85, transpose=False, fragment=True),
    notes="""
 
 - interindividual differences
