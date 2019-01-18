@@ -68,7 +68,7 @@ wiki_extras="""
 ----
 TagYear{YY} TagTalks [[TagAnrHorizontalV1]]""".format(YY=str(YYYY)[-2:]),
 sections= ['Motivation', #A dynamic probabilistic bias in visual motion direction',
-    'Raw psychophysical results',
+    'What psychophysical results tell us',
     'The Bayesian Changepoint Detector',
     'Results using the BCP']
  )
@@ -787,11 +787,21 @@ the brain is not strongly a bayesian machine, but weakly
 
 
 
+
 perspectives:
 - interindividual differences
 - RL
 
     """)
+
+s.add_slide(content=s.content_figures(
+    [os.path.join(figpath_overleaf, '5_inter-individual_differences_fit.png')],
+            title=title + mode_txt, height=s.meta['height']*.7, transpose=False, fragment=True),
+   notes="""
+
+- interindividual differences
+
+""")
 # # TODO : average KDE
 # tag = 'kde_mean'
 # for txt in [str(k) for k in range(4)]:
