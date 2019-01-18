@@ -152,7 +152,7 @@ intro += """
 {Acknowledgements}
 """.format(**meta)
 
-s.add_slide(content=intro,
+s.hide_slide(content=intro,
         notes="""
 * (AUTHOR) Hi, I am Laurent Perrinet from (LOGO) the Institute de Neurosciences de la Timone in Marseille, a joint unit from the CNRS and AMU. Using computational models, I am investigating the link between the efficiency of behavioural responses in vision, their underlying neural code and their adaptation to the structure of the world.
 
@@ -162,7 +162,7 @@ s.add_slide(content=intro,
 
 
 
-s.add_slide(content=s.content_figures([figname], cell_bgcolor=meta['bgcolor'], height=s.meta['height']*height_ratio) + '<BR><a href="{url}"> {url} </a>'.format(url= meta['url']),
+s.hide_slide(content=s.content_figures([figname], cell_bgcolor=meta['bgcolor'], height=s.meta['height']*height_ratio) + '<BR><a href="{url}"> {url} </a>'.format(url= meta['url']),
 notes=" All the material is available online - please flash this QRcode this leads to a page with links to further references and code ")
 
 s.add_slide(content=intro,
