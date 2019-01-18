@@ -69,7 +69,7 @@ wiki_extras="""
 ----
 TagYear{YY} TagTalks [[TagAnrHorizontalV1]]""".format(YY=str(YYYY)[-2:]),
 sections= ['Motivation', #A dynamic probabilistic bias in visual motion direction',
-    'What psychophysical results tell us',
+    'What psychophysical results tell us?',
     'The Bayesian Changepoint Detector',
     'Results using the BCP']
  )
