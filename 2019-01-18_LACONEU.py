@@ -56,6 +56,9 @@ meta = dict(
  short_conference='LACONEU 2019',
  conference='LACONEU 2019: 5th Latin-American Summer School in Computational Neuroscience',
  location='Valparaiso (Chile)',
+ time_start = '15:45:00',
+ time_end = '16:30:00',
+ projects='anr-horizontal-v1',
  YYYY=YYYY, MM=MM, DD=DD,
  tag=tag,
  url=f'https://laurentperrinet.github.io/{tag}',
@@ -832,37 +835,44 @@ s.add_slide(content=intro,
 
 s.close_section()
 
-
 if slides_filename is None:
-
-    with open("/tmp/wiki.txt", "w") as text_file:
+    with open("README.md", "w") as text_file:
         text_file.write("""\
-#acl All:read
+# {title}
 
-= {title}  =
+* What:: talk @ [conference](conference_url)
+* Who:: {author}
+* Where: {location}, see {url}
+* When: {DD:02d}/{MM:02d}/{YYYY}, time: {time_start}-{time_end}
 
+* What:
+  * Slides @ https://laurentperrinet.github.io/{tag}
+  * Code for slides @ https://github.com/laurentperrinet/{tag}/
+  * Abstract: {abstract}
 
- What:: talk @ the [[{conference_url}|{conference}]]
- Who:: {author}
- When:: {DD}/{MM}/{YYYY}
- Where:: {location}
- Slides:: https://laurentperrinet.github.io/{tag}
- Code:: https://github.com/laurentperrinet/{tag}/
+""".format(**meta))
 
-== reference ==
-{{{{{{
-#!bibtex
+    with open("/tmp/talk.bib", "w") as text_file:
+        text_file.write("""\
 @inproceedings{{{tag},
     Author = "{author}",
-    Booktitle = "{conference}, {location}",
+    Booktitle = "{conference}",
     Title = "{title}",
+    Abstract = "{abstract}",
     Url = "{url}",
     Year = "{YYYY}",
+    Date = "{YYYY}-{MM:02d}-{DD:02d}",
+    location = "{location}",
+    projects = "{projects}",
+    time_start = "{YYYY}-{MM:02d}-{DD:02d}T{time_start}",
+    time_start = "{YYYY}-{MM:02d}-{DD:02d}T{time_end}",
+    url = "{url}",
+    url_slides = "https://laurentperrinet.github.io/{tag}",
+    url_code = "https://github.com/laurentperrinet/{tag}/",
 }}
-}}}}}}
-## add an horizontal rule to end the include
-{wiki_extras}
+
 """.format(**meta))
+
 
 else:
     s.compile(filename=slides_filename)
