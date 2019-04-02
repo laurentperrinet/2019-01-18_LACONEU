@@ -174,7 +174,7 @@ s.close_section()
 
 # /Users/laurentperrinet/pool/AME_is_AnalyseModelisationExperimentation_Chloe/AnticipatorySPEM
 figpath_GDR = os.path.join(home, 'pool/AME_is_AnalyseModelisationExperimentation_Chloe/AnticipatorySPEM/Poster/2017-11-24_Poster_GDR_Robotique/figures')
-figpath_overleaf = os.path.join(home, 'pool/AME_is_AnalyseModelisationExperimentation_Chloe/AnticipatorySPEM/overleaf/figures')
+figpath_overleaf = os.path.join(home, 'pool/AME_is_AnalyseModelisationExperimentation_Chloe/PasturelMontagniniPerrinet2019/figures')
 figpath_aSPEM = os.path.join(home, 'pool/AME_is_AnalyseModelisationExperimentation_Chloe/AnticipatorySPEM/figures')
 
 i_section += 1
